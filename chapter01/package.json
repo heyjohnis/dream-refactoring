@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "jest": "^26.6.3"
+  },
+  "name": "chapter01",
+  "version": "1.0.0",
+  "main": "statement.js",
+  "scripts": {
+    "test": "jest --watchAll --verbose"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
