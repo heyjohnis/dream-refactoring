@@ -1,22 +1,20 @@
 function statement(invoice, plays) {
   const statementData = {};
   statementData.customer = invoice.customer;
-  statementData.performances = invoice.performances;
-  return renderPlainText(statementData, plays);
-}
+  statementData.performances = invoice.performances.map(enrichPerformance);
+  return renderPlainText(statementData);
 
-function renderPlainText(data, plays) {
-  let result = `청구 내역 (고객명: ${data.customer})\n`;
-  for (let perf of data.performances) {
-    // print line for this order
-    result += ` ${playFor(perf).name}: ${usd(amountFor(perf)/100)} (${perf.audience} seats)\n`;
+  function enrichPerformance(aPerformance) {
+    const result = Object.assign({}, aPerformance);
+    result.play = playFor(result);
+    result.amount = amountFor(result);
+    return result;
   }
-    
-  result += `총액: ${usd(totalAmount()/100)}\n`; 
-  // 변수 인라인하기 : 변수제거하기 let volumeCredits = 0;
-  result += `적립 포인트: ${totalVolumeCredits()} credits\n`;
-  return result;
 
+  function playFor(aPerformance){
+    return plays[aPerformance.playID];
+  }
+  
   function amountFor(aPerformance) {
     let result = 0;
     switch (playFor(aPerformance).type) {
@@ -38,11 +36,21 @@ function renderPlainText(data, plays) {
     }
     return result;
   }
-  
-  function playFor(aPerformance){
-    return plays[aPerformance.playID];
+}
+
+
+function renderPlainText(data) {
+  let result = `청구 내역 (고객명: ${data.customer})\n`;
+  for (let perf of data.performances) {
+    // print line for this order
+    result += ` ${perf.play.name}: ${usd(perf.amount/100)} (${perf.audience} seats)\n`;
   }
-  
+    
+  result += `총액: ${usd(totalAmount()/100)}\n`; 
+  // 변수 인라인하기 : 변수제거하기 let volumeCredits = 0;
+  result += `적립 포인트: ${totalVolumeCredits()} credits\n`;
+  return result;
+
   function usd(aNumber) {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -55,7 +63,7 @@ function renderPlainText(data, plays) {
     let volume = 0;
     volume = Math.max(aPerf.audience - 30, 0);
     // add extra credit for every ten comedy attendees
-    if ("comedy" === playFor(aPerf).type) 
+    if ("comedy" === aPerf.play.type) 
       volume += Math.floor(aPerf.audience / 5);
     return volume;
   }
@@ -72,7 +80,7 @@ function renderPlainText(data, plays) {
   function totalAmount() {
     let account = 0;
     for (let perf of data.performances) {
-      account += amountFor(perf);
+      account += perf.amount;
     }
     return account;
   }
