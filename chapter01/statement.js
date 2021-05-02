@@ -1,23 +1,20 @@
-let plays;  // Test 를 위해 임시로 추가
+/* Test 를 위해 임시로 추가 */
+let plays;  
+let invoice;
 
-function statement(invoice, _plays) {
+function statement(_invoice, _plays) {
   plays = _plays;
-  let totalAmount = 0;
-  let volumeCredits = 0;
-  let result = `Statement for ${invoice.customer}\n`;
-
-  for (let perf of invoice.performances) {
-    // add volume credits
-    volumeCredits += volumeCreditsFor(perf);
-  }
+  invoice = _invoice;
   
+  let result = `Statement for ${invoice.customer}\n`;
   for (let perf of invoice.performances) {
     // print line for this order
     result += ` ${playFor(perf).name}: ${usd(amountFor(perf)/100)} (${perf.audience} seats)\n`;
-    totalAmount += amountFor(perf);
   }
-  result += `Amount owed is ${usd(totalAmount/100)}\n`;
-  result += `You earned ${volumeCredits} credits\n`;
+    
+  result += `Amount owed is ${usd(totalAmount()/100)}\n`;
+  // 변수 인라인하기 : 변수제거하기 let volumeCredits = 0;
+  result += `You earned ${totalVolumeCredits()} credits\n`;
   return result;
 }
 
@@ -55,13 +52,30 @@ function usd(aNumber) {
   }).format(aNumber);
 }
 
-function volumeCreditsFor(aPerformance) {
-  let volumeCredits = 0;
-  volumeCredits = Math.max(aPerformance.audience - 30, 0);
+function volumeCreditsFor(aPerf) {
+  let volume = 0;
+  volume = Math.max(aPerf.audience - 30, 0);
   // add extra credit for every ten comedy attendees
-  if ("comedy" === playFor(aPerformance).type) 
-    volumeCredits += Math.floor(aPerformance.audience / 5);
-  return volumeCredits;
+  if ("comedy" === playFor(aPerf).type) 
+    volume += Math.floor(aPerf.audience / 5);
+  return volume;
+}
+
+function totalVolumeCredits() {
+  let result = 0;
+  for (let perf of invoice.performances) {
+    // add volume credits
+    result += volumeCreditsFor(perf);
+  }
+  return result;
+}
+
+function totalAmount() {
+  let account = 0;
+  for (let perf of invoice.performances) {
+    account += amountFor(perf);
+  }
+  return account;
 }
 
 module.exports = statement;
