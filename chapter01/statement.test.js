@@ -8,5 +8,6 @@ test('example statement', () => {
    
    const statement_string = statement(invoice, plays);
    console.log("statement_string : ", statement_string);
+   console.log()
    expect(statement_string).toMatchSnapshot();
 });
