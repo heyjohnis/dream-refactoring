@@ -1,34 +1,29 @@
-function statement(invoice, plays) {
+let plays;  // Test 를 위해 임시로 추가
+
+function statement(invoice, _plays) {
+  plays = _plays;
   let totalAmount = 0;
   let volumeCredits = 0;
   let result = `Statement for ${invoice.customer}\n`;
-  const format = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2
-  }).format;
 
   for (let perf of invoice.performances) {
-    const play = plays[perf.playID];
-
-    // 함수 쪼
-    let thisAmount = amountFor(perf, play);
     // add volume credits
-    volumeCredits += Math.max(perf.audience - 30, 0);
-    // add extra credit for every ten comedy attendees
-    if ("comedy" === play.type) volumeCredits += Math.floor(perf.audience / 5);
-    // print line for this order
-    result += ` ${play.name}: ${format(thisAmount/100)} (${perf.audience} seats)\n`;
-    totalAmount += thisAmount;
+    volumeCredits += volumeCreditsFor(perf);
   }
-  result += `Amount owed is ${format(totalAmount/100)}\n`;
+  
+  for (let perf of invoice.performances) {
+    // print line for this order
+    result += ` ${playFor(perf).name}: ${usd(amountFor(perf)/100)} (${perf.audience} seats)\n`;
+    totalAmount += amountFor(perf);
+  }
+  result += `Amount owed is ${usd(totalAmount/100)}\n`;
   result += `You earned ${volumeCredits} credits\n`;
   return result;
 }
 
-function amountFor(aPerformance, play) {
+function amountFor(aPerformance) {
   let result = 0;
-  switch (play.type) {
+  switch (playFor(aPerformance).type) {
     case "tragedy":
       result = 40000;
       if (aPerformance.audience > 30) {
@@ -43,10 +38,30 @@ function amountFor(aPerformance, play) {
       result += 300 * aPerformance.audience;
       break;
     default:
-      throw new Error(`unknown type: ${play.type}`);
+      throw new Error(`unknown type: ${playFor(aPerformance)}`);
   }
   return result;
 }
 
+function playFor(aPerformance){
+  return plays[aPerformance.playID];
+}
+
+function usd(aNumber) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2
+  }).format(aNumber);
+}
+
+function volumeCreditsFor(aPerformance) {
+  let volumeCredits = 0;
+  volumeCredits = Math.max(aPerformance.audience - 30, 0);
+  // add extra credit for every ten comedy attendees
+  if ("comedy" === playFor(aPerformance).type) 
+    volumeCredits += Math.floor(aPerformance.audience / 5);
+  return volumeCredits;
+}
 
 module.exports = statement;
