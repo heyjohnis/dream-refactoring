@@ -1,14 +1,8 @@
-This is my summary of the "Refactoring: Improving the Design of Existing Code" by Martin Fowler. I use it while learning and as quick reference. It is not intended to be an standalone substitution of the book so if you really want to learn the concepts here presented, buy and read the book and use this repository as a reference and guide.
-
-If you are the publisher and think this repository should not be public, just write me an email at hugomatilla [at] gmail [dot] com and I will make it private.
-
-Contributions: Issues, comments and pull requests are super welcome :smiley:
-
-<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
 # 1. TABLE OF CONTENT
 - [1. TABLE OF CONTENT](#1-table-of-content)
 - [3. BAD SMELLS IN CODE](#3-bad-smells-in-code)
+	- [0. Mysterious Name : 기이한 이름]()
 	- [1. Duplicated code](#1-duplicated-code)
 	- [2. Long Method](#2-long-method)
 	- [3. Large Classes](#3-large-classes)
