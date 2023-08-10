@@ -1,43 +1,44 @@
+import createStatementData from './createStatementData';
 
-function statement (invoice, plays) {
-    let totalAmount = 0;
-    let volumeCredits = 0;
-    let result = `Statement for ${invoice.customer}\n`;
-    const format = new Intl.NumberFormat("en-US",
-        { style: "currency", currency: "USD",
-            minimumFractionDigits: 2 }).format;
+function statement(invoice, plays) {
+  return renderPlainText(createStatementData(invoice, plays));
+}
 
-    for (let perf of invoice.performances) {
-        const play = plays[perf.playID];
-        let thisAmount = 0;
-        switch (play.type) {
-            case "tragedy":
-                thisAmount = 40000;
-                if (perf.audience > 30) {
-                    thisAmount += 1000 * (perf.audience - 30);
-                }
-                break;
-            case "comedy":
-                thisAmount = 30000;
-                if (perf.audience > 20) {
-                    thisAmount += 10000 + 500 * (perf.audience - 20);
-                }
-                thisAmount += 300 * perf.audience;
-                break;
-            default:
-                throw new Error(`unknown type: ${play.type}`);
-        }
-        // add volume credits
-        volumeCredits += Math.max(perf.audience - 30, 0);
-        // add extra credit for every ten comedy attendees
-        if ("comedy" === play.type) volumeCredits += Math.floor(perf.audience / 5);
-        // print line for this order
-        result += ` ${play.name}: ${format(thisAmount/100)} (${perf.audience} seats)\n`;
-        totalAmount += thisAmount;
-    }
-    result += `Amount owed is ${format(totalAmount/100)}\n`;
-    result += `You earned ${volumeCredits} credits\n`;
-    return result;
+function renderPlainText(data) {
+  let result = `청구 내역 (고객명: ${data.customer})\n`;
+  for (let perf of data.performances) {
+    // print line for this order
+    result += ` ${perf.play.name}: ${usd(perf.amount/100)} (${perf.audience} seats)\n`;
+  }
+
+  result += `총액: ${usd(data.totalAmount/100)}\n`;
+  // 변수 인라인하기 : 변수제거하기 let volumeCredits = 0;
+  result += `적립 포인트: ${data.totalVolumeCredits} credits\n`;
+  return result;
+}
+
+function htmlStatement(invoice, plays) {
+  return renderHtml(createStatementData(invoice, plays));
+}
+
+function renderHtml(data) {
+  let result = `<h1>청구 내역 (고객명: ${data.customer})</h1>\n`;
+  result += `<table>\n `;
+  result += `  <tr><th>연극</th><th>좌석 수</th><th>금액</th>\n`;
+  for (let perf of data.performances) {
+    result += `  <tr><td>${perf.play.name}</td><td>${usd(perf.amount/100)}</td><td>${perf.audience}좌수</td>`;
+    result += `<td>${usd(data.totalAmount/100)}</td></tr>\n`;
+  }
+  result += `</table>`;
+  return result;
+}
+
+function usd(aNumber) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2
+  }).format(aNumber);
 }
 
 module.exports = statement;
